@@ -126,4 +126,28 @@
     width: 100vw;
   }
 }
+.extra-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 0px;
+}
+
+.extra-btn {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  font-weight: bold;
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: 0.3s;
+  width: 29%;
+  text-align: center;
+}
+
+.extra-btn:hover {
+  background: rgba(255, 255, 255, 0.4);
+}
 

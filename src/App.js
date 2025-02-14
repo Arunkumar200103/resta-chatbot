@@ -17,6 +17,9 @@ const App = () => {
   const [selectedCity, setSelectedCity] = useState("");
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [inputText, setInputText] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const citiesPerPage = 3;
+  const totalPages = Math.ceil(cities.length / citiesPerPage);
   const messagesEndRef = useRef(null);
 
   useEffect(() => {
@@ -31,7 +34,7 @@ const App = () => {
     const handleKeyDown = (event) => {
       let options = [];
       if (step === 1) options = detectedLocation;
-      if (step === 2) options = cities;
+      if (step === 2) options = cities.slice((currentPage - 1) * citiesPerPage, currentPage * citiesPerPage);
       if (step === 3) options = places[selectedCity] || [];
 
       if (event.key === "ArrowDown") {
@@ -39,7 +42,7 @@ const App = () => {
       } else if (event.key === "ArrowUp") {
         setSelectedIndex((prev) => (prev - 1 + options.length) % options.length);
       } else if (event.key === "Enter") {
-        event.preventDefault(); // Prevent form submission reload
+        event.preventDefault();
         if (inputText.trim()) {
           handleInputSubmit();
         } else if (options.length > 0) {
@@ -50,7 +53,7 @@ const App = () => {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [step, selectedCity, selectedIndex, detectedLocation, inputText]);
+  }, [step, selectedCity, selectedIndex, detectedLocation, inputText, currentPage]);
 
   const detectLocation = () => {
     setTimeout(() => {
@@ -93,6 +96,20 @@ const App = () => {
     setInputText("");
   };
 
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage((prev) => prev + 1);
+      setSelectedIndex(0);
+    }
+  };
+
+  const handlePreviousPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage((prev) => prev - 1);
+      setSelectedIndex(0);
+    }
+  };
+
   return (
     <div className="app-container">
       <Header /> {/* Include Header Component */}
@@ -125,13 +142,32 @@ const App = () => {
               )}
 
               {step === 2 && (
-                <div className="options-grid">
-                  {cities.map((city, idx) => (
-                    <button key={idx} className={`option-btn ${selectedIndex === idx ? "active" : ""}`} onClick={() => handleSelection(city)}>
-                      {city}
+                <>
+                  <div className="options-grid">
+                    {cities.slice((currentPage - 1) * citiesPerPage, currentPage * citiesPerPage).map((city, idx) => (
+                      <button
+                        key={idx}
+                        className={`option-btn ${selectedIndex === idx ? "active" : ""}`}
+                        onClick={() => handleSelection(city)}
+                      >
+                        {city}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Pagination Controls */}
+                  <div className="extra-buttons">
+                    <button className="option-btn extra-btn" onClick={handlePreviousPage} disabled={currentPage === 1}>
+                      Prev
                     </button>
-                  ))}
-                </div>
+                    <button className="option-btn extra-btn">
+                      {currentPage}/{totalPages}
+                    </button>
+                    <button className="option-btn extra-btn" onClick={handleNextPage} disabled={currentPage === totalPages}>
+                      Next
+                    </button>
+                  </div>
+                </>
               )}
 
               {step === 3 && (
@@ -150,12 +186,7 @@ const App = () => {
 
           {/* Keyboard input with send icon */}
           <div className="chat-input">
-            <input
-              type="text"
-              placeholder="Type your choice..."
-              value={inputText}
-              onChange={(e) => setInputText(e.target.value)}
-            />
+            <input type="text" placeholder="Type your choice..." value={inputText} onChange={(e) => setInputText(e.target.value)} />
             <button onClick={handleInputSubmit} className="send-btn">
               <FaPaperPlane />
             </button>
