@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
+import Header from "./Header"; // Import Header component
+import { FaPaperPlane } from "react-icons/fa"; // Import send icon
 import "./App.css";
 
 const cities = ["Chennai", "Erode", "Kovai", "Bengaluru", "Trichy"];
@@ -14,6 +16,7 @@ const App = () => {
   const [step, setStep] = useState(0);
   const [selectedCity, setSelectedCity] = useState("");
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [inputText, setInputText] = useState("");
   const messagesEndRef = useRef(null);
 
   useEffect(() => {
@@ -36,13 +39,18 @@ const App = () => {
       } else if (event.key === "ArrowUp") {
         setSelectedIndex((prev) => (prev - 1 + options.length) % options.length);
       } else if (event.key === "Enter") {
-        if (options.length > 0) handleSelection(options[selectedIndex]);
+        event.preventDefault(); // Prevent form submission reload
+        if (inputText.trim()) {
+          handleInputSubmit();
+        } else if (options.length > 0) {
+          handleSelection(options[selectedIndex]);
+        }
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [step, selectedCity, selectedIndex, detectedLocation]);
+  }, [step, selectedCity, selectedIndex, detectedLocation, inputText]);
 
   const detectLocation = () => {
     setTimeout(() => {
@@ -53,65 +61,104 @@ const App = () => {
   };
 
   const handleManualSelection = () => {
-    setMessages([{ text: "Please select a city:", sender: "bot" }]);
+    setMessages((prev) => [...prev, { text: "Please select a city:", sender: "bot" }]);
     setStep(2);
     setSelectedIndex(0);
   };
 
   const handleSelection = (choice) => {
-    if (step === 2) {
+    setMessages((prev) => [...prev, { text: `You selected ${choice}`, sender: "user" }]);
+
+    if (step === 1 || step === 2) {
       setSelectedCity(choice);
-      setMessages([{ text: `You selected ${choice}. Now choose a POP place:`, sender: "bot" }]);
+      setMessages((prev) => [...prev, { text: `You selected ${choice}. Now choose a POP place:`, sender: "bot" }]);
       setStep(3);
       setSelectedIndex(0);
     }
   };
 
+  const handleInputSubmit = () => {
+    if (!inputText.trim()) return;
+
+    let options = [];
+    if (step === 1) options = detectedLocation;
+    if (step === 2) options = cities;
+    if (step === 3) options = places[selectedCity] || [];
+
+    if (options.includes(inputText.trim())) {
+      handleSelection(inputText.trim());
+    } else {
+      setMessages((prev) => [...prev, { text: "Invalid option, please try again.", sender: "bot" }]);
+    }
+    setInputText("");
+  };
+
   return (
-    <div className="chatbot-container">
-      <div className="chatbot-box">
-        <div className="chat-container">
-          <div className="messages">
-            {messages.map((message, index) => (
-              <div key={index} className={`message ${message.sender}`}>
-                {message.text}
-              </div>
-            ))}
+    <div className="app-container">
+      <Header /> {/* Include Header Component */}
 
-            {step === 1 && (
-              <div className="options-grid">
-                {detectedLocation.map((pop, idx) => (
-                  <button key={idx} className={`option-btn ${selectedIndex === idx ? "active" : ""}`}>
-                    {pop}
+      <div className="chatbot-container">
+        <div className="chatbot-box">
+          <div className="chat-container">
+            <div className="messages">
+              {messages.map((message, index) => (
+                <div key={index} className={`message ${message.sender}`}>
+                  {message.text}
+                </div>
+              ))}
+
+              {step === 1 && (
+                <div className="options-grid">
+                  {detectedLocation.map((pop, idx) => (
+                    <button
+                      key={idx}
+                      className={`option-btn ${selectedIndex === idx ? "active" : ""}`}
+                      onClick={() => handleSelection(pop)}
+                    >
+                      {pop}
+                    </button>
+                  ))}
+                  <button className={`option-btn manual-btn ${selectedIndex === detectedLocation.length ? "active" : ""}`} onClick={handleManualSelection}>
+                    Select Manually
                   </button>
-                ))}
-                <button className={`option-btn manual-btn ${selectedIndex === detectedLocation.length ? "active" : ""}`} onClick={handleManualSelection}>
-                  Select Manually
-                </button>
-              </div>
-            )}
+                </div>
+              )}
 
-            {step === 2 && (
-              <div className="options-grid">
-                {cities.map((city, idx) => (
-                  <button key={idx} className={`option-btn ${selectedIndex === idx ? "active" : ""}`} onClick={() => handleSelection(city)}>
-                    {city}
-                  </button>
-                ))}
-              </div>
-            )}
+              {step === 2 && (
+                <div className="options-grid">
+                  {cities.map((city, idx) => (
+                    <button key={idx} className={`option-btn ${selectedIndex === idx ? "active" : ""}`} onClick={() => handleSelection(city)}>
+                      {city}
+                    </button>
+                  ))}
+                </div>
+              )}
 
-            {step === 3 && (
-              <div className="options-grid">
-                {places[selectedCity]?.map((place, idx) => (
-                  <button key={idx} className={`option-btn ${selectedIndex === idx ? "active" : ""}`}>
-                    {place}
-                  </button>
-                ))}
-              </div>
-            )}
+              {step === 3 && (
+                <div className="options-grid">
+                  {places[selectedCity]?.map((place, idx) => (
+                    <button key={idx} className={`option-btn ${selectedIndex === idx ? "active" : ""}`} onClick={() => handleSelection(place)}>
+                      {place}
+                    </button>
+                  ))}
+                </div>
+              )}
 
-            <div ref={messagesEndRef} />
+              <div ref={messagesEndRef} />
+            </div>
+          </div>
+
+          {/* Keyboard input with send icon */}
+          <div className="chat-input">
+            <input
+              type="text"
+              placeholder="Type your choice..."
+              value={inputText}
+              onChange={(e) => setInputText(e.target.value)}
+            />
+            <button onClick={handleInputSubmit} className="send-btn">
+              <FaPaperPlane />
+            </button>
           </div>
         </div>
       </div>

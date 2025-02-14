@@ -61,7 +61,7 @@
 
 /* Buttons for selection */
 .option-btn {
-  background:  rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.2);
   color: white;
   font-weight: bold;
   padding: 12px;
@@ -71,12 +71,48 @@
   font-size: 14px;
   transition: 0.3s;
   width: 100%;
+  text-align: center;
 }
 
 .option-btn:hover {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.4);
 }
 
+/* Chat input area */
+.chat-input {
+  display: flex;
+  align-items: center;
+  background:  #333;
+  padding: 10px;
+ 
+}
+
+/* Text input */
+.chat-input input {
+  flex: 1;
+  color: #fff;
+  padding: 10px;
+  border: none;
+  outline: none;
+  font-size: 16px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Send button (icon) */
+.send-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 22px;
+  margin-left: 10px;
+  color: #007bff;
+  transition: 0.2s;
+}
+
+.send-btn:hover {
+  color: #0056b3;
+}
 
 /* Ensure full height on mobile */
 @media (max-width: 768px) {
@@ -90,3 +126,4 @@
     width: 100vw;
   }
 }
+
