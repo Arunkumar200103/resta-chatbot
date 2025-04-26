@@ -20,7 +20,7 @@ const Header = () => {
           ☰
         </button>
 
-        <h3>ChatBot</h3>
+        <h3>PubFinder</h3>
 
         <button className="sign-up-btn" onClick={() => setIsModalOpen(true)}>Sign Up</button>
       </div>
